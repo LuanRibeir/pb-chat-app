@@ -3,8 +3,7 @@ import asyncHandler from "express-async-handler";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 
-// User Signup
-export const user_signup = asyncHandler(async (req, res, next) => {
+const user_signup = asyncHandler(async (req, res, next) => {
   const { name, email, password } = req.body;
   const user = await User.findOne({ email });
 
@@ -38,3 +37,23 @@ export const user_signup = asyncHandler(async (req, res, next) => {
     return res.status(400).json({ error: "Dados inválidos." });
   }
 });
+
+const user_login = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  const isPasswordMatch = await bcrypt.compare(password, user?.password || "");
+
+  if (!user || !isPasswordMatch) {
+    return res.status(400).json({ error: "Senha ou Email inválido." });
+  }
+
+  generateTokenAndSetCookie(user._id, res);
+
+  res.status(200).json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+  });
+});
+
+export { user_signup, user_login };
