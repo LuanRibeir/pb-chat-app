@@ -56,4 +56,9 @@ const user_login = asyncHandler(async (req, res, next) => {
   });
 });
 
-export { user_signup, user_login };
+const user_logout = asyncHandler(async (req, res, next) => {
+  res.cookie("jwt", "", { maxAge: 1 }); // Clean cookie
+  res.status(200).json({ message: "Usuário encerrou sua sessão com sucesso." });
+});
+
+export { user_signup, user_login, user_logout };
