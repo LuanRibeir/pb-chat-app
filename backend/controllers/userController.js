@@ -96,4 +96,19 @@ const user_update = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ message: "Usuário atualizado com sucesso.", user });
 });
-export { user_signup, user_login, user_logout, user_update };
+
+const user_profile = asyncHandler(async (req, res, next) => {
+  const { email } = req.params;
+
+  const user = await User.findOne({ email })
+    .select("-password")
+    .select("-updatedAt")
+    .select("-friends");
+
+  if (!user) {
+    return res.status(400).json({ message: "Usuário não encontrado." });
+  }
+
+  res.status(200).json(user);
+});
+export { user_signup, user_login, user_logout, user_profile, user_update };
