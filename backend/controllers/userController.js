@@ -69,14 +69,14 @@ const user_update = asyncHandler(async (req, res, next) => {
   let user = await User.findById(userId);
 
   if (!user) {
-    return res.status(400).json({ message: "Usuário não foi encontrado." });
+    return res.status(400).json({ error: "Usuário não foi encontrado." });
   }
 
   // For the check to work we need to convert the object into a string
   if (req.params.id !== userId.toString()) {
     return res
       .status(400)
-      .json({ message: "Você não pode atualizar outros usuários." });
+      .json({ error: "Você não pode atualizar outros usuários." });
   }
 
   if (password) {
@@ -106,7 +106,7 @@ const user_profile = asyncHandler(async (req, res, next) => {
     .select("-friends");
 
   if (!user) {
-    return res.status(400).json({ message: "Usuário não encontrado." });
+    return res.status(400).json({ error: "Usuário não encontrado." });
   }
 
   res.status(200).json(user);
