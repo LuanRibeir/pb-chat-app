@@ -63,3 +63,16 @@ const message_getMessages = asyncHandler(async (req, res, next) => {
 
   res.status(200).json(message);
 });
+
+const message_getConversation = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  // Populate the participant field with the User name and profilePicture
+  const conversation = await Conversation.find({
+    participants: userId,
+  }).populate({ path: "participants", select: "name profilePicture" });
+
+  res.status(200).json(conversation);
+});
+
+export { message_send, message_getMessages, message_getConversation };
