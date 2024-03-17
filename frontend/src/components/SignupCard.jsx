@@ -53,7 +53,7 @@ export default function SignupCard() {
       localStorage.setItem("user-info", JSON.stringify(data));
       setUser(data);
     } catch (error) {
-      console.log(error);
+      showToast("Erro", error, "error");
     }
   };
 

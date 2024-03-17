@@ -28,7 +28,7 @@ const LogoutButton = () => {
       localStorage.removeItem("user-info");
       setUser(null);
     } catch (error) {
-      console.log(error);
+      showToast("Erro", error, "error");
     }
   };
 
