@@ -61,4 +61,38 @@ const user_logout = asyncHandler(async (req, res, next) => {
   res.status(200).json({ message: "Usuário encerrou sua sessão com sucesso." });
 });
 
-export { user_signup, user_login, user_logout };
+const user_update = asyncHandler(async (req, res, next) => {
+  const { name, email, password, profilePicture, about } = req.body;
+  const userId = req.user._id;
+
+  // Find user after the auth by the middleware
+  let user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(400).json({ message: "Usuário não foi encontrado." });
+  }
+
+  // For the check to work we need to convert the object into a string
+  if (req.params.id !== userId.toString()) {
+    return res
+      .status(400)
+      .json({ message: "Você não pode atualizar outros usuários." });
+  }
+
+  if (password) {
+    // Create password hash
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    user.password = hashedPassword;
+  }
+
+  user.name = name || user.name;
+  user.email = email || user.email;
+  user.profilePicture = profilePicture || user.profilePicture;
+  user.about = about || user.about;
+
+  user = await user.save();
+
+  res.status(200).json({ message: "Usuário atualizado com sucesso.", user });
+});
