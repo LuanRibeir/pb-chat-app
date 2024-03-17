@@ -43,4 +43,23 @@ const message_send = asyncHandler(async (req, res, next) => {
   res.status(201).json({ newMessage });
 });
 
-export { message_send };
+const message_getMessages = asyncHandler(async (req, res, next) => {
+  const { receiverId } = req.params;
+  const userId = req.user._id;
+
+  // Get the conversations between the two parties
+  const conversation = await Conversation.findOne({
+    participants: { $all: [userId, receiverId] },
+  });
+
+  if (!conversation) {
+    return res.status(404).json({ error: "Conversa não existe." });
+  }
+
+  // Get all the messages in the conversation
+  const message = await Message.find({ conversationId: conversation._id }).sort(
+    { createdAt: 1 }
+  );
+
+  res.status(200).json(message);
+});
