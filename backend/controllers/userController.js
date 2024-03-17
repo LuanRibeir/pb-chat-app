@@ -96,3 +96,4 @@ const user_update = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ message: "Usuário atualizado com sucesso.", user });
 });
+export { user_signup, user_login, user_logout, user_update };
