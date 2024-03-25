@@ -92,6 +92,13 @@ const user_update = asyncHandler(async (req, res, next) => {
 
     user.password = hashedPassword;
   }
+
+  // Check if email exists
+  let emailExist = await User.findOne({ email });
+  if (user.email !== email && emailExist) {
+    return res.status(400).json({ error: "Email já registrado." });
+  }
+
   // Cloudinary response object handler
   if (profilePicture) {
     // Get the profile picture ID from the secure URL and destroy it
