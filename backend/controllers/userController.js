@@ -2,6 +2,7 @@ import User from "../models/userModel.js";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
+import { v2 as cloudinary } from "cloudinary";
 
 const user_signup = asyncHandler(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -32,6 +33,8 @@ const user_signup = asyncHandler(async (req, res, next) => {
       _id: newUser._id,
       name: newUser.name,
       email: newUser.email,
+      about: newUser.about,
+      profilePicture: newUser.profilePicture,
     });
   } else {
     return res.status(400).json({ error: "Dados inválidos." });
@@ -53,6 +56,8 @@ const user_login = asyncHandler(async (req, res, next) => {
     _id: user._id,
     name: user.name,
     email: user.email,
+    about: user.about,
+    profilePicture: user.profilePicture,
   });
 });
 
@@ -62,9 +67,10 @@ const user_logout = asyncHandler(async (req, res, next) => {
 });
 
 const user_update = asyncHandler(async (req, res, next) => {
-  const { name, email, password, profilePicture, about } = req.body;
-  const userId = req.user._id;
+  const { name, email, password, about } = req.body;
+  let { profilePicture } = req.body;
 
+  const userId = req.user._id;
   // Find user after the auth by the middleware
   let user = await User.findById(userId);
 
@@ -86,6 +92,18 @@ const user_update = asyncHandler(async (req, res, next) => {
 
     user.password = hashedPassword;
   }
+  // Cloudinary response object handler
+  if (profilePicture) {
+    // Get the profile picture ID from the secure URL and destroy it
+    if (user.profilePicture) {
+      await cloudinary.uploader.destroy(
+        user.profilePicture.split("/").pop().split(".")[0]
+      );
+    }
+
+    const uploadedResponse = await cloudinary.uploader.upload(profilePicture);
+    profilePicture = uploadedResponse.secure_url;
+  }
 
   user.name = name || user.name;
   user.email = email || user.email;
@@ -94,7 +112,10 @@ const user_update = asyncHandler(async (req, res, next) => {
 
   user = await user.save();
 
-  res.status(200).json({ message: "Usuário atualizado com sucesso.", user });
+  // to show null as password response
+  user.password = null;
+
+  res.status(200).json(user);
 });
 
 const user_profile = asyncHandler(async (req, res, next) => {
