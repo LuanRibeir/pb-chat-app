@@ -3,8 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
 import { useRecoilValue } from "recoil";
 import userAtom from "./atoms/userAtom";
-import HomePage from "./pages/HomePage";
-import LogoutButton from "./components/LogoutButton";
+import ChatPage from "./pages/ChatPage";
 import Header from "./components/Header";
 import UpdateProfilePage from "./pages/UpdateProfilePage";
 
@@ -16,17 +15,11 @@ function App() {
       <Header />
       <Routes>
         <Route
-          path="/"
-          element={user ? <HomePage /> : <Navigate to="/auth" />}
-        />
-        <Route
           path="/update"
           element={user ? <UpdateProfilePage /> : <Navigate to="/auth" />}
         />
-        <Route path="/auth" element={!user ? <AuthPage /> : <HomePage />} />
+        <Route path="/auth" element={!user ? <AuthPage /> : <ChatPage />} />
       </Routes>
-
-      {user && <LogoutButton />}
     </Container>
   );
 }
