@@ -15,6 +15,7 @@ import { useRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
 import usePreviewImg from "../hooks/usePreviewImg";
 import useShowToast from "../hooks/useShowToast";
+import { Link as RouterLink } from "react-router-dom";
 
 export default function UpdateProfilePage() {
   const [user, setUser] = useRecoilState(userAtom);
@@ -154,8 +155,10 @@ export default function UpdateProfilePage() {
               _hover={{
                 bg: "red.500",
               }}
+              as={RouterLink}
+              to={"/chat"}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button
               bg={"green.400"}
@@ -166,7 +169,7 @@ export default function UpdateProfilePage() {
               }}
               type="submit"
             >
-              Submit
+              Confirmar
             </Button>
           </Stack>
         </Stack>
