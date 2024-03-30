@@ -68,11 +68,18 @@ const message_getConversation = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
 
   // Populate the participant field with the User name and profilePicture
-  const conversation = await Conversation.find({
+  const conversations = await Conversation.find({
     participants: userId,
   }).populate({ path: "participants", select: "name profilePicture" });
 
-  res.status(200).json(conversation);
+  // Remove current user from participants array for each conversation
+  conversations.forEach((conversation) => {
+    conversation.participants = conversation.participants.filter(
+      (participant) => participant._id.toString() !== userId.toString()
+    );
+  });
+
+  res.status(200).json(conversations);
 });
 
 export { message_send, message_getMessages, message_getConversation };
