@@ -156,7 +156,7 @@ export default function UpdateProfilePage() {
                 bg: "red.500",
               }}
               as={RouterLink}
-              to={"/chat"}
+              to={"/auth"}
             >
               Cancelar
             </Button>

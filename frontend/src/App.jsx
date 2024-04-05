@@ -15,14 +15,7 @@ function App() {
       <Container maxW="container.lg">
         <Header />
         <Routes>
-          <Route
-            path="/"
-            element={!user ? <Navigate to="/auth" /> : <Navigate to="/chat" />}
-          />
-          <Route
-            path="/chat"
-            element={!user ? <Navigate to="/auth" /> : <Navigate to="/chat" />}
-          />
+          <Route path="/" element={<Navigate to="/auth" />} />
           <Route
             path="/update"
             element={user ? <UpdateProfilePage /> : <Navigate to="/auth" />}
