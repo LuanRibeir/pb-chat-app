@@ -37,6 +37,7 @@ const Conversation = ({ conversation }) => {
           userId: recipient._id,
           profilePicture: recipient.profilePicture,
           name: recipient.name,
+          mock: conversation.mock,
         })
       }
       bg={

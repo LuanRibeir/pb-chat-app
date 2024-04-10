@@ -10,7 +10,7 @@ import {
 import Message from "./Message";
 import MessageInput from "./MessageInput";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 import { chosenConversationAtom } from "../atoms/conversationsAtom";
 import userAtom from "../atoms/userAtom";
@@ -23,27 +23,43 @@ const MessageContainer = () => {
   const [chosenConversation, setChosenConversation] = useRecoilState(
     chosenConversationAtom
   );
+  const messageEndRef = useRef(null);
+
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    setLoadingMessages(true);
+    setMessages([]);
+    console.log("Fetching messages...");
+  }, [chosenConversation.userId]);
 
   useEffect(() => {
     const getMessages = async () => {
       try {
-        const res = await fetch(`/api/messages/${chosenConversation.userId}`);
-        const data = await res.json();
+        if (chosenConversation.mock) return;
 
-        if (data.error) {
-          showToast("Erro", data.error, "error");
-          return;
-        }
-        setMessages(data);
+        fetch(`/api/messages/${chosenConversation.userId}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              console.log(data.error);
+              // showToast(data.error);
+              return;
+            }
+
+            setMessages(data);
+            setLoadingMessages(false);
+          });
       } catch (error) {
-        showToast("Erro", error.message, "error");
+        console.log(error);
       } finally {
-        setLoadingMessages(false);
+        console.log("aass");
       }
     };
-
     getMessages();
-  }, [showToast, chosenConversation.userId]);
+  }, [chosenConversation.userId, chosenConversation.mock, messages]);
 
   return (
     <Flex
@@ -90,8 +106,16 @@ const MessageContainer = () => {
           ))}
 
         {!loadingMessages &&
-          messages.map((message) => (
-            <Flex key={message._id} direction={"column"}>
+          messages.map((message, index) => (
+            <Flex
+              key={message._id || index}
+              direction={"column"}
+              ref={
+                messages.length - 1 === messages.indexOf(message)
+                  ? messageEndRef
+                  : null
+              }
+            >
               <Message
                 message={message}
                 ownMessage={currentUser._id === message.sender}

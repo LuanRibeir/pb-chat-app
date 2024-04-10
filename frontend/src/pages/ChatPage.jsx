@@ -12,21 +12,28 @@ import {
 import Conversation from "../components/Conversation";
 import { GiConversation } from "react-icons/gi";
 import MessageContainer from "../components/MessageContainer";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import {
   chosenConversationAtom,
   conversationsAtom,
 } from "../atoms/conversationsAtom";
+import userAtom from "../atoms/userAtom";
 
 const ChatPage = () => {
-  const showToast = useShowToast();
   const [loadingConversations, setLoadingConversations] = useState(true);
+  const [searchingUser, setSearchingUser] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
   const [conversations, setConversations] = useRecoilState(conversationsAtom);
+  const currentUser = useRecoilValue(userAtom);
   const [chosenConversation, setChosenConversation] = useRecoilState(
     chosenConversationAtom
   );
+  const showToast = useShowToast();
+
+  // const [isDataFromApi, setIsDataFromApi] = useState(true);
 
   useEffect(() => {
     const getConversations = async () => {
@@ -35,7 +42,10 @@ const ChatPage = () => {
         const data = await res.json();
         if (data.error) {
           showToast("Erro", data.message, "error");
+          return;
         }
+
+        // console.log(data);
         setConversations(data);
       } catch (error) {
         showToast("Erro", error.message, "error");
@@ -44,7 +54,66 @@ const ChatPage = () => {
       }
     };
     getConversations();
-  }, [showToast, setConversations]);
+  }, [setConversations, showToast]);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setSearchingUser(true);
+
+    try {
+      const res = await fetch(`/api/users/profile/${searchText}`);
+      const searchedUser = await res.json();
+
+      if (searchedUser.error) {
+        showToast("Erro", searchedUser.message, "error");
+        return;
+      }
+
+      const calledUserIsCurrentUser = searchedUser._id === currentUser._id;
+      if (calledUserIsCurrentUser) {
+        showToast("Erro", "Você não pode procurar você mesmo.", "error");
+        return;
+      }
+
+      const conversationAlreadyExists = conversations.find(
+        (conversation) => conversation.participants[0]._id === searchedUser._id
+      );
+
+      if (conversationAlreadyExists) {
+        setChosenConversation({
+          _id: conversationAlreadyExists._id,
+          userId: searchedUser._id,
+          name: searchedUser.name,
+          profilePicture: searchedUser.profilePicture,
+        });
+
+        return;
+      }
+
+      const mockConversation = {
+        mock: true,
+        lastMessage: {
+          text: "",
+          sender: "",
+        },
+        _id: Date.now(),
+        participants: [
+          {
+            _id: searchedUser._id,
+            name: searchedUser.name,
+            profilePicture: searchedUser.profilePicture,
+          },
+        ],
+      };
+
+      setConversations((prevConvs) => [...prevConvs, mockConversation]);
+      console.log(conversations);
+    } catch (error) {
+      showToast("Erro", error.message, "error");
+    } finally {
+      setSearchingUser(false);
+    }
+  };
 
   return (
     <Box
@@ -79,10 +148,17 @@ const ChatPage = () => {
             Sua Conversa
           </Text>
 
-          <form>
+          <form onSubmit={handleSearch}>
             <Flex alignItems={"center"} gap={2}>
-              <Input placeholder="Procurar Usuário" />
-              <Button size={"sm"}>
+              <Input
+                placeholder="Procurar Usuário"
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              <Button
+                size={"sm"}
+                onClick={handleSearch}
+                isLoading={searchingUser}
+              >
                 <SearchIcon />
               </Button>
             </Flex>
