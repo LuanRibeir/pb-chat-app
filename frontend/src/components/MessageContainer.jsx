@@ -32,34 +32,28 @@ const MessageContainer = () => {
   useEffect(() => {
     setLoadingMessages(true);
     setMessages([]);
-    console.log("Fetching messages...");
-  }, [chosenConversation.userId]);
 
-  useEffect(() => {
     const getMessages = async () => {
       try {
         if (chosenConversation.mock) return;
+        const res = await fetch(`/api/messages/${chosenConversation.userId}`);
+        const data = await res.json();
 
-        fetch(`/api/messages/${chosenConversation.userId}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.error) {
-              console.log(data.error);
-              // showToast(data.error);
-              return;
-            }
+        if (data.error) {
+          showToast("Error", data.error, "error");
+          return;
+        }
 
-            setMessages(data);
-            setLoadingMessages(false);
-          });
+        setMessages(data);
       } catch (error) {
-        console.log(error);
+        showToast("Error", error.message, "error");
       } finally {
-        console.log("aass");
+        setLoadingMessages(false);
       }
     };
+
     getMessages();
-  }, [chosenConversation.userId, chosenConversation.mock, messages]);
+  }, [showToast, chosenConversation.userId, chosenConversation.mock]);
 
   return (
     <Flex
@@ -106,9 +100,9 @@ const MessageContainer = () => {
           ))}
 
         {!loadingMessages &&
-          messages.map((message, index) => (
+          messages.map((message) => (
             <Flex
-              key={message._id || index}
+              key={message._id}
               direction={"column"}
               ref={
                 messages.length - 1 === messages.indexOf(message)

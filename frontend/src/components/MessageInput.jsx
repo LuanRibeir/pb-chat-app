@@ -17,7 +17,6 @@ const MessageInput = ({ setMessages }) => {
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-
     if (!messageText) return;
 
     try {

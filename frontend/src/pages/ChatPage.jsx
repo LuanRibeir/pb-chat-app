@@ -33,45 +33,42 @@ const ChatPage = () => {
   );
   const showToast = useShowToast();
 
-  // const [isDataFromApi, setIsDataFromApi] = useState(true);
-
   useEffect(() => {
+    setLoadingConversations(true);
     const getConversations = async () => {
       try {
         const res = await fetch("/api/messages/conversations");
         const data = await res.json();
         if (data.error) {
-          showToast("Erro", data.message, "error");
+          showToast("Error", data.error, "error");
           return;
         }
 
-        // console.log(data);
         setConversations(data);
       } catch (error) {
-        showToast("Erro", error.message, "error");
+        showToast("Error", error.message, "error");
       } finally {
         setLoadingConversations(false);
       }
     };
+
     getConversations();
-  }, [setConversations, showToast]);
+  }, [showToast, setConversations]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
     setSearchingUser(true);
-
     try {
       const res = await fetch(`/api/users/profile/${searchText}`);
       const searchedUser = await res.json();
-
       if (searchedUser.error) {
-        showToast("Erro", searchedUser.message, "error");
+        showToast("Error", searchedUser.error, "error");
         return;
       }
 
-      const calledUserIsCurrentUser = searchedUser._id === currentUser._id;
-      if (calledUserIsCurrentUser) {
-        showToast("Erro", "Você não pode procurar você mesmo.", "error");
+      const messagingYourself = searchedUser._id === currentUser._id;
+      if (messagingYourself) {
+        showToast("Error", "You cannot message yourself", "error");
         return;
       }
 
@@ -84,11 +81,12 @@ const ChatPage = () => {
           _id: conversationAlreadyExists._id,
           userId: searchedUser._id,
           name: searchedUser.name,
-          profilePicture: searchedUser.profilePicture,
+          userProfilePic: searchedUser.profilepicture,
         });
-
         return;
       }
+
+      console.log(searchedUser);
 
       const mockConversation = {
         mock: true,
@@ -107,9 +105,8 @@ const ChatPage = () => {
       };
 
       setConversations((prevConvs) => [...prevConvs, mockConversation]);
-      console.log(conversations);
     } catch (error) {
-      showToast("Erro", error.message, "error");
+      showToast("Error", error.message, "error");
     } finally {
       setSearchingUser(false);
     }
