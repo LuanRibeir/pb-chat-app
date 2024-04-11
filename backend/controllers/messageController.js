@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Conversation from "../models/conversationModel.js";
 import Message from "../models/messageModel.js";
+import { getRecepientSocketId } from "../socket/socket.js";
 
 const message_send = asyncHandler(async (req, res, next) => {
   // get the recipientId and message comming from the client
@@ -39,6 +40,11 @@ const message_send = asyncHandler(async (req, res, next) => {
       },
     }),
   ]);
+
+  const recipientSocketId = getRecepientSocketId(recipientId);
+  if (recipientSocketId) {
+    io.to(recipientSocketId).emit("newMessage", newMessage);
+  }
 
   res.status(201).json({ newMessage });
 });
