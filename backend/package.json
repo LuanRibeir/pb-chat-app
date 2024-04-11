@@ -19,7 +19,8 @@
     "express": "^4.18.3",
     "express-async-handler": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.2.2"
+    "mongoose": "^8.2.2",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
