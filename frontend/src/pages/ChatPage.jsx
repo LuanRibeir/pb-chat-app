@@ -20,6 +20,7 @@ import {
   conversationsAtom,
 } from "../atoms/conversationsAtom";
 import userAtom from "../atoms/userAtom";
+import { useSocket } from "../../context/SocketContext";
 
 const ChatPage = () => {
   const [loadingConversations, setLoadingConversations] = useState(true);
@@ -32,6 +33,7 @@ const ChatPage = () => {
     chosenConversationAtom
   );
   const showToast = useShowToast();
+  const { socket, onlineUsers } = useSocket();
 
   useEffect(() => {
     setLoadingConversations(true);
@@ -185,6 +187,9 @@ const ChatPage = () => {
               <Conversation
                 key={conversation._id}
                 conversation={conversation}
+                isOnline={onlineUsers.includes(
+                  conversation.participants[0]._id
+                )}
               />
             ))}
         </Flex>
