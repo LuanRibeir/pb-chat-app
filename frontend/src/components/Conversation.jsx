@@ -11,7 +11,7 @@ import {
 import { chosenConversationAtom } from "../atoms/conversationsAtom";
 import { useRecoilState } from "recoil";
 
-const Conversation = ({ conversation }) => {
+const Conversation = ({ conversation, isOnline }) => {
   const { colorMode } = useColorMode();
   const recipient = conversation.participants[0];
   const lastMessage = conversation.lastMessage.text;
@@ -54,7 +54,11 @@ const Conversation = ({ conversation }) => {
           size={{ base: "xs", sm: "sm", md: "md" }}
           src={recipient.profilePicture}
         >
-          <AvatarBadge boxSize={"1em"} bg={"green.500"} />
+          {isOnline ? (
+            <AvatarBadge boxSize={"1em"} bg={"green.500"} />
+          ) : (
+            <AvatarBadge boxSize={"1em"} bg={"red.500"} />
+          )}
         </Avatar>
       </WrapItem>
 
